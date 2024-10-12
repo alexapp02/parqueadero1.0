@@ -27,7 +27,7 @@ def gui_login():
             usuario = cursor.fetchone()
             if usuario:
                 print("Inicio de sesión exitoso como usuario")
-                entrar_user.show()  # Muestra la ventana de confirmación de usuario
+                entrar2.show()  # Muestra la ventana de confirmación de usuario
                 login.hide()  # Oculta la ventana de inicio de sesión
                 return
     except psycopg2.Error as e:
@@ -96,6 +96,7 @@ login_file = "login.ui"
 registro_file = "RegistroUsuario.ui"
 registro2_file = "RegistroAdministrador.ui"
 entrar_file = "confirmacion.ui"
+entrar2_file = "confirmacionuser.ui"
 error_file = "ErrorRegistro.ui"
 error2_file = "ErrorLogin.ui"
 
@@ -103,6 +104,7 @@ login = uic.loadUi(login_file)
 registro = uic.loadUi(registro_file)
 registro2 = uic.loadUi(registro2_file)
 entrar = uic.loadUi(entrar_file)
+entrar2 = uic.loadUi(entrar2_file)
 error = uic.loadUi(error_file)
 error2 = uic.loadUi(error2_file)
 
