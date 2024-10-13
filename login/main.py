@@ -1,29 +1,36 @@
 import psycopg2
-from usuario import *
-from database import *
+from usuario import Usuario
+from database import Database
+from administrador import Administrador
 
 # Inicializar la conexión a la base de datos
-conexion = Database("postgres", "Soloparami34", "localhost")
+conexion = Database("postgres", "Soloparami34", "localhost").conectar()
 
-# Crear instancias de Usuario
-usuario = Usuario
-usuario2 = Usuario
-usuario3 = Usuario
-usuario4 = Usuario
-usuario5 = Usuario
-usuario6 = Usuario
-
-# Crear un usuario (asegurándose de usar 'Usuario' con la capitalización correcta)
-if Usuario.crearUsuario(conexion.conectar(), "Pepito", "pepito@example.com", "password123", "123456789"):
+# Crear un usuario
+if Usuario.crearUsuario(conexion, "Pepito", "pepito@example.com", "password123", "123456789"):
     print("USUARIO CREADO EXITOSAMENTE")
 else:
     print("ERROR DE CREACION")
 
-
-
 # Consultar un usuario por ID
-usuario.consultarUsuario(conexion.conectar(), 1)
+Usuario.consultarUsuario(conexion, 1)
 
 # Consultar todos los usuarios
-usuario.consultarUsuarios(conexion.conectar())
+Usuario.consultarUsuarios(conexion)
 
+# Crear un nuevo administrador
+if Administrador.crearAdministrador(conexion, "admin1", "admin1@example.com", "adminpass"):
+    print("ADMINISTRADOR CREADO EXITOSAMENTE")
+else:
+    print("ERROR DE CREACION")
+# Consultar un administrador
+Administrador.consultarAdministrador(conexion, 1)
+
+# Consultar todos los administradores
+Administrador.consultarAdministradores(conexion)
+
+# Actualizar un administrador
+Administrador.actualizarAdministrador(conexion, 1, "admin_actualizado", "newemail@example.com")
+
+# Eliminar un administrador
+Administrador.eliminarAdministrador(conexion, 1)

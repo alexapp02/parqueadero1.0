@@ -1,70 +1,70 @@
+from PyQt5 import QtWidgets, uic
 import psycopg2
+from database import Database
 
-class Administrador:
-    nombre = ""
-    email = ""
-    password = ""
 
-    def __init__(self, nombre, email, password):
-        self.nombre = nombre
-        self.email = email
-        self.password = password
+# Clase para la aplicación de registro de administrador
+class RegistroAdminApp(QtWidgets.QMainWindow):
+    def __init__(self, login_window):
+        super(RegistroAdminApp, self).__init__()
+        uic.loadUi('RegistroAdministrador.ui', self)
 
-    def crearAdministrador(conexion, nombre, email, password):
+        # Guardamos una referencia a la ventana de login para volver a ella
+        self.login_window = login_window
+
+        # Conexión a la base de datos
+        self.conexion = Database("postgres", "Soloparami34", "localhost")
+
+        # Conectar botones
+        self.aceptar.clicked.connect(self.registrar_admin)
+        self.cancelar.clicked.connect(self.regresar_login)
+
+    def registrar_admin(self):
+        nombre = self.nombre.text().strip()
+        email = self.email.text().strip()
+        password = self.contrasena.text().strip()
+
+        if not nombre or not email or not password:
+            self.mostrar_error("Todos los campos son obligatorios.")
+            return
+
         try:
-            with conexion.cursor() as cursor:
-                # Cambiado el nombre de la tabla a minúsculas
-                consulta = "INSERT INTO administrador (nombre, email, password) VALUES (%s, %s, %s);"
-                cursor.execute(consulta, (nombre, email, password))
-            conexion.commit()
-            print("Administrador creado con éxito")
-            return True
-        except psycopg2.Error as e:
-            print("Ocurrió un error al crear el administrador: ", e)
-            return False
+            # Obtener la conexión una sola vez
+            connection = self.conexion.conectar()
+            with connection.cursor() as cursor:
+                # Verificar si el correo ya existe
+                cursor.execute("SELECT * FROM administrador WHERE email = %s;", (email,))
+                if cursor.fetchone():
+                    self.mostrar_error("El correo ya está en uso.")
+                    return
 
-    def consultarAdministrador(conexion, id_administrador):
-        try:
-            with conexion.cursor() as cursor:
-                # Cambiado el nombre de la tabla y la columna a minúsculas
-                cursor.execute("SELECT * FROM administrador WHERE id_administrador = %s;", (id_administrador,))
-                administrador = cursor.fetchone()
-                if administrador:
-                    print(administrador)
-                else:
-                    print("El administrador no existe")
+                # Si el correo no existe, insertar el nuevo administrador
+                cursor.execute("INSERT INTO administrador (nombre, email, password) VALUES (%s, %s, %s)",
+                               (nombre, email, password))
+                connection.commit()  # Confirmar la transacción
+                self.mostrar_mensaje("Administrador creado con éxito.")
+                self.regresar_login()
         except psycopg2.Error as e:
-            print("Ocurrió un error al consultar: ", e)
+            self.mostrar_error(f"Error: {e}")
+            print(f"Error al registrar administrador: {e}")  # Mensaje de depuración
 
-    def consultarAdministradores(conexion):
-        try:
-            with conexion.cursor() as cursor:
-                # Cambiado el nombre de la tabla a minúsculas
-                cursor.execute("SELECT * FROM administrador;")
-                administradores = cursor.fetchall()
-                for administrador in administradores:
-                    print(administrador)
-        except psycopg2.Error as e:
-            print("Ocurrió un error al consultar: ", e)
+    def mostrar_mensaje(self, mensaje):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setText(mensaje)
+        msg.setWindowTitle("Éxito")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msg.exec_()
 
-    def actualizarAdministrador(conexion, id_administrador, nombre, email):
-        try:
-            with conexion.cursor() as cursor:
-                # Cambiado el nombre de la tabla y columna a minúsculas
-                consulta = "UPDATE administrador SET nombre = %s, email = %s WHERE id_administrador = %s;"
-                cursor.execute(consulta, (nombre, email, id_administrador))
-            conexion.commit()
-            print("El registro se actualizó con éxito")
-        except psycopg2.Error as e:
-            print("Ocurrió un error al actualizar: ", e)
+    def mostrar_error(self, mensaje):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Critical)
+        msg.setText(mensaje)
+        msg.setWindowTitle("Error")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msg.exec_()
 
-    def eliminarAdministrador(conexion, id_administrador):
-        try:
-            with conexion.cursor() as cursor:
-                # Cambiado el nombre de la tabla y columna a minúsculas
-                consulta = "DELETE FROM administrador WHERE id_administrador = %s;"
-                cursor.execute(consulta, (id_administrador,))
-                print("Administrador eliminado con éxito")
-            conexion.commit()
-        except psycopg2.Error as e:
-            print("Error eliminando: ", e)
+    def regresar_login(self):
+        # Volver a la ventana de login
+        self.hide()
+        self.login_window.show()
