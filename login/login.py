@@ -1,8 +1,8 @@
 from PyQt5 import QtWidgets, uic
 import psycopg2
 from database import Database
-from usuario import RegistroUsuarioApp  # Asegúrate de importar la clase de usuario.py
-from administrador import RegistroAdminApp  # Importar la clase desde administrador.py
+from administrador import RegistroAdministrador # Importar la clase desde administrador.py
+from usuario import RegistroUsuario  # Importar la clase desde usuario.py
 
 conexion = Database("postgres", "Soloparami34", "localhost")
 
@@ -14,8 +14,7 @@ def abrir_registro_administrador():
 # Función para mostrar la ventana de registro de usuario
 def abrir_registro_usuario():
     login.hide()  # Ocultar la ventana de inicio de sesión
-    registro_usuario_app = RegistroUsuarioApp(login)  # Crear instancia de RegistroUsuarioApp
-    registro_usuario_app.show()  # Mostrar la ventana de registro de usuario
+    ventana_registro_usuario.show()
 
 # Función para manejar el inicio de sesión
 def gui_login():
@@ -77,7 +76,8 @@ error = uic.loadUi(error_file)
 error2 = uic.loadUi(error2_file)
 
 # Crear la ventana de registro de administrador desde administrador.py
-ventana_registro_admin = RegistroAdminApp(login)
+ventana_registro_admin = RegistroAdministrador(login)
+ventana_registro_usuario = RegistroUsuario(login)
 
 # Conectar botones de la ventana de login
 login.aceptar.clicked.connect(gui_login)  # Conectar botón Aceptar para login

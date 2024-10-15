@@ -1,12 +1,13 @@
 from PyQt5 import QtWidgets, uic
 import psycopg2
 from database import Database
+import re
 
 
 # Clase para la aplicación de registro de administrador
-class RegistroAdminApp(QtWidgets.QMainWindow):
+class RegistroAdministrador(QtWidgets.QMainWindow):
     def __init__(self, login_window):
-        super(RegistroAdminApp, self).__init__()
+        super(RegistroAdministrador, self).__init__()
         uic.loadUi('RegistroAdministrador.ui', self)
 
         # Guardamos una referencia a la ventana de login para volver a ella
@@ -28,8 +29,12 @@ class RegistroAdminApp(QtWidgets.QMainWindow):
             self.mostrar_error("Todos los campos son obligatorios.")
             return
 
+        # Validar la contraseña
+        if not self.validar_contrasena(password):
+            self.mostrar_error("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.")
+            return
+
         try:
-            # Obtener la conexión una sola vez
             connection = self.conexion.conectar()
             with connection.cursor() as cursor:
                 # Verificar si el correo ya existe
@@ -46,7 +51,11 @@ class RegistroAdminApp(QtWidgets.QMainWindow):
                 self.regresar_login()
         except psycopg2.Error as e:
             self.mostrar_error(f"Error: {e}")
-            print(f"Error al registrar administrador: {e}")  # Mensaje de depuración
+
+    def validar_contrasena(self, password):
+        # Regex para validar la contraseña
+        regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$'
+        return bool(re.match(regex, password))
 
     def mostrar_mensaje(self, mensaje):
         msg = QtWidgets.QMessageBox()
